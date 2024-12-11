@@ -1,0 +1,106 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+model Roles {
+  id_rol    Int       @id @default(autoincrement())
+  nombre   String    @db.VarChar(45)
+  usuarios Usuarios[]
+}
+
+model Sedes {
+  id_sede   Int       @id @default(autoincrement())
+  nombre   String    @db.VarChar(255)
+  usuarios Usuarios[]
+}
+
+model Usuarios {
+  id_usuario      Int    @id @default(autoincrement())
+  role_id        Int
+  sede_id         Int
+  nombre_usuario  String
+  contrasena      String
+  role            Roles   @relation(fields: [role_id], references: [id_rol])
+  sede            Sedes   @relation(fields: [sede_id], references: [id_sede])
+}
+
+model Medicamentos {
+  id_medicamentos       Int       @id @default(autoincrement())
+  laboratorio           String    @db.VarChar(300)
+  tipo_producto         String    @db.VarChar(200)
+  nombre_generico       String
+  nombre_comercial      String
+  fecha_vencimiento     DateTime
+  cum                   String    @db.VarChar(100)
+  lote                  String
+  codigo                Int
+  cobertura             String    @db.VarChar(45)
+  entregados            Entregados[]
+  pendientes            Pendientes[]
+}
+
+model Pacientes {
+  id_pacientes          Int             @id @default(autoincrement())
+  identificacion        String             @unique
+  tipo_identificacion   String
+  nombre                String
+  telefono1             String          @db.VarChar(10)
+  telefono2             String          @db.VarChar(10)
+  eps                   String          @db.VarChar(80)
+  diagnostico           Diagnostico[] 
+  entregados            Entregados[] 
+  pendientes            Pendientes[]  
+}
+
+model Entregados {
+  id_entregados                   Int           @id @default(autoincrement())
+  observacion                     String        @db.VarChar(990)
+  fecha_registro                  DateTime
+  medicamento_id                  Int
+  cantidad_dispensada             Int
+  numero_del_entregado            Int
+  paciente_id      String          
+  medicamento                     Medicamentos  @relation(fields: [medicamento_id], references: [id_medicamentos])
+  paciente                        Pacientes     @relation(fields: [paciente_id], references: [identificacion]) 
+}
+
+model Diagnostico {
+  id_diagnostico          Int           @id @default(autoincrement())
+  codigo                  String        @db.VarChar(45)
+  descripcion             String        @db.VarChar(500)
+  paciente_id             String        
+  paciente                Pacientes     @relation(fields: [paciente_id], references: [identificacion])
+  pendientes              Pendientes[]  
+}
+
+model Pendientes {
+  id_pendientes        Int           @id @default(autoincrement())
+  numero_factura       Int
+  fecha_registro       DateTime
+  paciente_id          String        
+  medicamento_id       Int
+  diagnostico_id       Int?
+  cantidad_prescrita   Int
+  cantidad_pendiente   Int
+  cantidad_entregada   Int
+  tipo_entrega         String        @db.VarChar(45)
+  estado_dispensacion  EstadoDispensacion @default(pendiente)
+  numero_formula       String        @db.VarChar(45)
+  fecha_formula        DateTime
+  observacion          String        @db.VarChar(900)
+  paciente             Pacientes     @relation(fields: [paciente_id], references: [identificacion]) // Cambiado a identificacion
+  medicamento          Medicamentos  @relation(fields: [medicamento_id], references: [id_medicamentos])
+  diagnostico          Diagnostico?  @relation(fields: [diagnostico_id], references: [id_diagnostico])
+}
+
+enum EstadoDispensacion {
+  pendiente
+  en_proceso
+  completada
+}
