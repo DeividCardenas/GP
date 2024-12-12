@@ -19,9 +19,11 @@ CREATE TABLE `Usuarios` (
     `id_usuario` INTEGER NOT NULL AUTO_INCREMENT,
     `role_id` INTEGER NOT NULL,
     `sede_id` INTEGER NOT NULL,
+    `identificacion` VARCHAR(191) NOT NULL,
     `nombre_usuario` VARCHAR(191) NOT NULL,
     `contrasena` VARCHAR(191) NOT NULL,
 
+    UNIQUE INDEX `Usuarios_identificacion_key`(`identificacion`),
     PRIMARY KEY (`id_usuario`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

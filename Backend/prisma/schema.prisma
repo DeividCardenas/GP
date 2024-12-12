@@ -24,7 +24,9 @@ model Usuarios {
   id_usuario      Int    @id @default(autoincrement())
   role_id        Int
   sede_id         Int
-  nombre_usuario  String
+  identificacion  String @unique
+  nombre_completo String 
+  nombre_usuario  String @unique
   contrasena      String
   role            Roles   @relation(fields: [role_id], references: [id_rol])
   sede            Sedes   @relation(fields: [sede_id], references: [id_sede])
