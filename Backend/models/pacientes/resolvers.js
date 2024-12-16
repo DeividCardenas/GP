@@ -1,66 +1,63 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const {
+  getPacientes,
+  getPacienteById,
+  getPacienteByIdentificacion,
+  createPaciente,
+  updatePaciente,
+  deletePaciente,
+} = require('./service');
 
 const resolvers = {
   Query: {
     pacientes: async () => {
-      // Obtener todos los pacientes
-      return await prisma.pacientes.findMany({
-        include: {
-          diagnostico: true, // Incluir diagnóstico relacionado
-          entregados: true, // Incluir entregados relacionados
-          pendientes: true, // Incluir pendientes relacionados
-        },
-      });
+      try {
+        return await getPacientes();
+      } catch (error) {
+        throw new Error('Error al obtener pacientes: ' + error.message);
+      }
     },
+
     getPaciente: async (_, { id_pacientes }) => {
-      // Obtener un paciente específico por ID
-      return await prisma.pacientes.findUnique({
-        where: { id_pacientes },
-        include: {
-          diagnostico: true,
-          entregados: true,
-          pendientes: true,
-        },
-      });
+      try {
+        return await getPacienteById(id_pacientes);
+      } catch (error) {
+        throw new Error('Error al obtener el paciente: ' + error.message);
+      }
+    },
+
+    getPacienteByIdentificacion: async (_, { identificacion }) => {
+      try {
+        return await getPacienteByIdentificacion(identificacion);
+      } catch (error) {
+        throw new Error('Error al obtener el paciente por identificación: ' + error.message);
+      }
     },
   },
 
   Mutation: {
     createPaciente: async (_, { input }) => {
-      // Crear un nuevo paciente
-      return await prisma.pacientes.create({
-        data: {
-          identificacion: input.identificacion,
-          tipo_identificacion: input.tipo_identificacion,
-          nombre: input.nombre,
-          telefono1: input.telefono1,
-          telefono2: input.telefono2,
-          eps: input.eps,
-        },
-      });
+      try {
+        return await createPaciente(input);
+      } catch (error) {
+        throw new Error('Error al crear el paciente: ' + error.message);
+      }
     },
 
-    updatePaciente: async (_, { id_pacientes, input }) => {
-      // Actualizar un paciente existente
-      return await prisma.pacientes.update({
-        where: { id_pacientes },
-        data: {
-          identificacion: input.identificacion,
-          tipo_identificacion: input.tipo_identificacion,
-          nombre: input.nombre,
-          telefono1: input.telefono1,
-          telefono2: input.telefono2,
-          eps: input.eps,
-        },
-      });
+    updatePaciente: async (_, { identificacion, input }) => {
+      try {
+        return await updatePaciente(identificacion, input);
+      } catch (error) {
+        throw new Error('Error al actualizar el paciente: ' + error.message);
+      }
     },
 
-    deletePaciente: async (_, { id_pacientes }) => {
-      // Eliminar un paciente
-      return await prisma.pacientes.delete({
-        where: { id_pacientes },
-      });
+    deletePaciente: async (_, { identificacion }) => {
+      try {
+        const pacienteEliminado = await deletePaciente(identificacion);
+        return pacienteEliminado;
+      } catch (error) {
+        throw new Error('Error al eliminar el paciente: ' + error.message);
+      }
     },
   },
 };

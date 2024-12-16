@@ -1,47 +1,69 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const { createSede, getSedeByNombre, getAllSedes, updateSede, deleteSede } = require('./service');
 
 const resolvers = {
   Query: {
+    // Obtener todas las sedes
     sedes: async () => {
-      return await prisma.sedes.findMany({
-        include: {
-          usuarios: true,  // Incluir usuarios relacionados con la sede
-        },
-      });
+      try {
+        return await getAllSedes();
+      } catch (error) {
+        console.error('Error en el resolver de sedes:', error.message);
+        throw new Error('Error al obtener las sedes.');
+      }
     },
-    getSede: async (_, { id_sede }) => {
-      return await prisma.sedes.findUnique({
-        where: { id_sede },
-        include: {
-          usuarios: true,
-        },
-      });
+
+    // Obtener una sede por nombre
+    getSedeByNombre: async (_, { nombre }) => {
+      try {
+        return await getSedeByNombre(nombre);
+      } catch (error) {
+        throw new Error('Error al obtener la sede: ' + error.message);
+      }
     },
   },
 
   Mutation: {
+    // Crear una nueva sede
     createSede: async (_, { input }) => {
-      return await prisma.sedes.create({
-        data: {
-          nombre: input.nombre,
-        },
-      });
+      const { nombre } = input;
+
+      const response = await createSede({ nombre });
+
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+
+      return {
+        message: response.message,
+        sede: response.sede,
+      };
     },
 
-    updateSede: async (_, { id_sede, input }) => {
-      return await prisma.sedes.update({
-        where: { id_sede },
-        data: {
-          nombre: input.nombre,
-        },
-      });
+    // Actualizar una sede
+    updateSede: async (_, { nombre, input }) => {
+      const response = await updateSede(nombre, input);
+
+      if (!response.success) {
+        throw new Error(response.message); 
+      }
+
+      return {
+        message: response.message,
+        sede: response.sede,
+      };
     },
 
-    deleteSede: async (_, { id_sede }) => {
-      return await prisma.sedes.delete({
-        where: { id_sede },
-      });
+    // Eliminar una sede
+    deleteSede: async (_, { nombre }) => {
+      const response = await deleteSede(nombre);
+
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+
+      return {
+        message: response.message,
+      };
     },
   },
 };

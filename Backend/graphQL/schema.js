@@ -34,7 +34,9 @@ const typeDefs = [
 
 // Unir todos los resolvers, organizando Query y Mutation
 const resolvers = {
+
   Query: {
+
     ...roleResolvers.Query,
     ...sedeResolvers.Query,
     ...usuarioResolvers.Query,
@@ -43,8 +45,11 @@ const resolvers = {
     ...entregadoResolvers.Query,
     ...diagnosticoResolvers.Query,
     ...pendienteResolvers.Query,
+
   },
+
   Mutation: {
+
     ...roleResolvers.Mutation,
     ...sedeResolvers.Mutation,
     ...usuarioResolvers.Mutation,
@@ -53,7 +58,9 @@ const resolvers = {
     ...entregadoResolvers.Mutation,
     ...diagnosticoResolvers.Mutation,
     ...pendienteResolvers.Mutation,
+
   }
+
 };
 
 

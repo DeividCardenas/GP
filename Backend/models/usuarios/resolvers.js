@@ -1,20 +1,13 @@
-const { authenticateUser, createUsuario, getUsuarioById, getUsuarioByIdentificacion, getAllUsuarios, updateUsuario, deleteUsuario } = require('./service');
+const { loginUsuario, createUser, getUsuarioByIdentificacion, getAllUsuarios, updateUsuario, deleteUsuario } = require('./service');
 
 const resolvers = {
+
   Query: {
     usuarios: async () => {
       try {
         return await getAllUsuarios();
       } catch (error) {
         throw new Error('Error al obtener los usuarios: ' + error.message);
-      }
-    },
-
-    getUsuario: async (_, { id_usuario }) => {
-      try {
-        return await getUsuarioById(id_usuario);
-      } catch (error) {
-        throw new Error('Error al obtener el usuario: ' + error.message);
       }
     },
 
@@ -25,61 +18,86 @@ const resolvers = {
         throw new Error('Error al obtener el usuario por identificación: ' + error.message);
       }
     },
+
   },
 
   Mutation: {
-    login: async (_, { nombre_usuario, contrasena }) => {
+    
+    async loginuser(_, { nombre_usuario, contrasena }) {
       try {
-        const user = await authenticateUser(nombre_usuario, contrasena);
-        if (!user) {
-          throw new Error('Usuario no encontrado');
-        }
-  
-        return {
-          id_usuario: user.id_usuario,
-          identificacion: user.identificacion,
-          nombre_completo: user.nombre_completo,
-          nombre_usuario: user.nombre_usuario,
-          contrasena: user.contrasena, 
-          role: user.role,
-          sede: user.sede,
-          message: "Autenticación exitosa" 
-        };
+          const usuario = await loginUsuario(nombre_usuario, contrasena);
+          return usuario;
       } catch (error) {
-        throw new Error('Error de autenticación: ' + error.message);
+          throw new Error(error.message);
       }
     },
 
     createUsuario: async (_, { input }) => {
-      try {
-        return await createUsuario(input);
-      } catch (error) {
-        throw new Error('Error al crear el usuario: ' + error.message);
+      const { identificacion, nombre_completo, nombre_usuario, contrasena, role_nombre, sede_nombre } = input;
+    
+      const response = await createUser({ 
+        identificacion, 
+        nombre_completo, 
+        nombre_usuario, 
+        contrasena, 
+        role_nombre, 
+        sede_nombre 
+      });
+    
+      if (!response.success) {
+        throw new Error(response.message);
       }
+    
+      return {
+        message: response.message,
+        usuario: response.usuario, 
+      };
     },
 
-    updateUsuario: async (_, { id_usuario, input }) => {
+    updateUsuario: async (_, { identificacion, input }) => {
       try {
-        return await updateUsuario(id_usuario, input);
+        
+        const result = await updateUsuario(identificacion, input);
+        
+        if (result.success) {
+          return {
+            success: true,
+            message: result.message,
+            usuario: result.usuario,
+          };
+        } else {
+          throw new Error(result.message);
+        }
       } catch (error) {
         throw new Error('Error al actualizar el usuario: ' + error.message);
       }
     },
 
-    deleteUsuario: async (_, { id_usuario }) => {
+    deleteUsuario: async (_, { identificacion }) => {
       try {
-        return await deleteUsuario(id_usuario);
+        const usuarioEliminado = await deleteUsuario(identificacion);
+    
+        return {
+          success: true,
+          message: `Usuario con identificación "${identificacion}" eliminado con éxito.`,
+          usuario: usuarioEliminado,
+        };
       } catch (error) {
-        throw new Error('Error al eliminar el usuario: ' + error.message);
+        return {
+          success: false,
+          message: 'Error al eliminar el usuario: ' + error.message,
+          usuario: null,
+        };
       }
     },
+
   },
 
-  // Resolver relaciones de Usuarios
   Usuarios: {
     role: async (parent) => parent.role,
     sede: async (parent) => parent.sede,
   },
+  
 };
 
 module.exports = resolvers;

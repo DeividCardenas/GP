@@ -1,25 +1,44 @@
 const gql = require('graphql-tag');
 
 const typeDefs = gql`
-  type Sedes {
-    id_sede: Int
+  type Sede {
     nombre: String
-    usuarios: [Usuarios]
+    usuarios: [Usuario]
+  }
+
+  type Usuario {
+    identificacion: String
+    nombre_completo: String
+    nombre_usuario: String
+    role: Role
+  }
+
+  type Role {
+    nombre: String
+  }
+
+  type SedeResponse {
+    message: String
+    sede: Sede
   }
 
   input CreateSedeInput {
-    nombre: String
+    nombre: String!
+  }
+
+  input UpdateSedeInput {
+    nombreNuevo: String!
   }
 
   type Query {
-    sedes: [Sedes]
-    getSede(id_sede: Int!): Sedes
+    sedes: [Sede]  
+    getSedeByNombre(nombre: String!): Sede
   }
 
   type Mutation {
-    createSede(input: CreateSedeInput): Sedes
-    updateSede(id_sede: Int!, input: CreateSedeInput): Sedes
-    deleteSede(id_sede: Int!): Sedes
+    createSede(input: CreateSedeInput!): SedeResponse!
+    updateSede(nombre: String!, input: UpdateSedeInput!): SedeResponse
+    deleteSede(nombre: String!): SedeResponse
   }
 `;
 

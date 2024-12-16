@@ -1,47 +1,91 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const {
+  createRole,
+  getRoleByNombre,
+  getAllRoles,
+  updateRole,
+  deleteRole,
+} = require('./service');
 
 const resolvers = {
   Query: {
+    // Obtener todos los roles
     roles: async () => {
-      return await prisma.roles.findMany({
-        include: {
-          usuarios: true,  // Incluir los usuarios relacionados con el rol
-        },
-      });
+      try {
+        const roles = await getAllRoles();
+        return roles;
+      } catch (error) {
+        throw new Error('Error al obtener los roles: ' + error.message);
+      }
     },
-    getRole: async (_, { id_rol }) => {
-      return await prisma.roles.findUnique({
-        where: { id_rol },
-        include: {
-          usuarios: true,
-        },
-      });
-    },
+
+    // Obtener un rol por ID
+    getRoleByNombre: async (_, { nombre }) => {
+      try {
+        // Llamar a la función getRoleByNombre con el nombre proporcionado
+        const result = await getRoleByNombre(nombre);
+    
+        if (result.success) {
+          return {
+            success: true,
+            message: result.message,
+            role: result.role,
+          };
+        } else {
+          throw new Error(result.message);
+        }
+      } catch (error) {
+        return {
+          success: false,
+          message: 'Error al obtener el rol: ' + error.message,
+          role: null,
+        };
+      }
+    },  
   },
 
   Mutation: {
+    // Crear un nuevo rol
     createRole: async (_, { input }) => {
-      return await prisma.roles.create({
-        data: {
-          nombre: input.nombre,
-        },
-      });
+      const { nombre } = input;
+    
+      const response = await createRole({ nombre });
+
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+    
+      return {
+        message: response.message,
+        role: response.role,
+      };
+    },
+    
+
+    // Actualizar un rol
+    updateRole: async (_, { nombre, input }) => {
+        const response = await updateRole(nombre, input);
+
+        if (!response.success) {
+          throw new Error(response.message);
+        }
+  
+        return {
+          message: response.message,
+          role: response.role,
+        };
     },
 
-    updateRole: async (_, { id_rol, input }) => {
-      return await prisma.roles.update({
-        where: { id_rol },
-        data: {
-          nombre: input.nombre,
-        },
-      });
-    },
+    // Eliminar un rol
+    deleteRole: async (_, { nombre }) => {
+      const response = await deleteRole(nombre);
 
-    deleteRole: async (_, { id_rol }) => {
-      return await prisma.roles.delete({
-        where: { id_rol },
-      });
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+
+      return {
+        message: response.message,
+      };
     },
   },
 };

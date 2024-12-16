@@ -2,24 +2,50 @@ const gql = require('graphql-tag');
 
 const typeDefs = gql`
   type Roles {
-    id_rol: Int
     nombre: String
     usuarios: [Usuarios]
+  }
+
+  type Role {
+    id_rol: Int
+    nombre: String
+    usuarios: [Usuario]
+  }
+
+  type Usuario {
+    identificacion: String
+    nombre_completo: String
+    nombre_usuario: String
+  }
+
+  type RoleResponse {
+    message: String
+    role: Role
+  }
+
+  type RolesListResponse {
+    success: Boolean
+    message: String
+    roles: [Roles]
   }
 
   input CreateRoleInput {
     nombre: String
   }
+  
+  input UpdateRoleInput {
+  nombreNuevo: String!
+  }
 
   type Query {
-    roles: [Roles]
-    getRole(id_rol: Int!): Roles
+    roles: RolesListResponse
+    getRoleByNombre(nombre: String!): RoleResponse
   }
 
   type Mutation {
-    createRole(input: CreateRoleInput): Roles
-    updateRole(id_rol: Int!, input: CreateRoleInput): Roles
-    deleteRole(id_rol: Int!): Roles
+    createRole(input: CreateRoleInput): RoleResponse
+    updateRole(nombre: String!, input: UpdateRoleInput): RoleResponse
+    deleteRole(nombre: String!): RoleResponse
   }
 `;
 

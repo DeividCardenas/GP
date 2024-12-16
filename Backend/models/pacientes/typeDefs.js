@@ -15,6 +15,15 @@ const typeDefs = gql`
     pendientes: [Pendientes]
   }
 
+  input UpdatePacienteInput {
+  identificacion: String
+  tipo_identificacion: String
+  nombre: String
+  telefono1: String
+  telefono2: String
+  eps: String
+  }
+
   # Tipo de entrada para crear o actualizar un Paciente
   input CreatePacienteInput {
     identificacion: String
@@ -29,13 +38,14 @@ const typeDefs = gql`
   type Query {
     pacientes: [Pacientes]
     getPaciente(id_pacientes: Int!): Pacientes
+    getPacienteByIdentificacion(identificacion: String!): Pacientes
   }
 
   # Mutaciones para crear, actualizar y eliminar Pacientes
   type Mutation {
     createPaciente(input: CreatePacienteInput): Pacientes
-    updatePaciente(id_pacientes: Int!, input: CreatePacienteInput): Pacientes
-    deletePaciente(id_pacientes: Int!): Pacientes
+    updatePaciente(identificacion: String!, input: UpdatePacienteInput!): Pacientes
+    deletePaciente(identificacion: String!): Boolean
   }
 `;
 
