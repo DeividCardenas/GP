@@ -31,7 +31,7 @@ const typeDefs = gql`
   }
 
   type Query {
-    sedes: [Sede]  
+    getAllSedes: [Sede]  
     getSedeByNombre(nombre: String!): Sede
   }
 

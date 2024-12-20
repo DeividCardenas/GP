@@ -1,131 +1,203 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Obtener todos los pacientes
-const getPacientes = async () => {
-  return await prisma.pacientes.findMany({
-    include: {
-      diagnostico: true,
-      entregados: true,
-      pendientes: true,
-    },
-  });
-};
+// Crear un nuevo paciente
+const createPaciente = async ({ identificacion, tipo_identificacion, nombre, telefono1, telefono2, eps }) => {
+  if (!identificacion || !tipo_identificacion || !nombre || !telefono1 || !telefono2 || !eps) {
+    return {
+      success: false,
+      message: 'Todos los campos son obligatorios.',
+      paciente: null,
+    };
+  }
 
-// Obtener un paciente por ID
-const getPacienteById = async (id_pacientes) => {
-  return await prisma.pacientes.findUnique({
-    where: { id_pacientes },
-    include: {
-      diagnostico: true,
-      entregados: true,
-      pendientes: true,
-    },
-  });
-};
-
-const getPacienteByIdentificacion = async (identificacion) => {
   try {
-    if (!identificacion) {
-      throw new Error("La identificación es obligatoria.");
-    }
-    return await prisma.pacientes.findUnique({
+    const pacienteExistente = await prisma.pacientes.findUnique({
       where: { identificacion },
     });
-  } catch (error) {
-    throw new Error('Error al obtener el paciente por identificación: ' + error.message);
-  }
-};
 
-// Crear un nuevo paciente
-const createPaciente = async (input) => {
-  try {
-    // Verificar si ya existe un paciente con la misma identificación
-    const existingPaciente = await prisma.pacientes.findUnique({
-      where: {
-        identificacion: input.identificacion, // Verifica si ya existe un paciente con esa identificación
-      },
-    });
-
-    if (existingPaciente) {
-      throw new Error('Ya existe un paciente con esa identificación.');
+    if (pacienteExistente) {
+      return {
+        success: false,
+        message: 'Paciente ya registrado.',
+        paciente: null,
+      };
     }
 
-    // Si no existe, crea el nuevo paciente
-    const paciente = await prisma.pacientes.create({
+    const nuevoPaciente = await prisma.pacientes.create({
       data: {
-        identificacion: input.identificacion,
-        tipo_identificacion: input.tipo_identificacion,
-        nombre: input.nombre,
-        telefono1: input.telefono1,
-        telefono2: input.telefono2,
-        eps: input.eps,
+        identificacion,
+        tipo_identificacion,
+        nombre,
+        telefono1,
+        telefono2,
+        eps,
+      },
+      select: {
+        id_pacientes: true,
+        identificacion: true,
+        tipo_identificacion: true,
+        nombre: true,
+        telefono1: true,
+        telefono2: true,
+        eps: true,
       },
     });
 
-    return { success: true, message: 'Paciente creado con éxito.', paciente };  
+    return {
+      success: true,
+      message: `Paciente "${nuevoPaciente.nombre}" creado con éxito.`,
+      paciente: nuevoPaciente,
+    };
   } catch (error) {
-    if (error.code === 'P2002') {
-      throw new Error('Error de unicidad: La identificación ya está en uso.');
-    }
-    throw new Error("Error al crear el paciente: " + error.message);
+    return {
+      success: false,
+      message: 'Error al crear el paciente: ' + error.message,
+      paciente: null,
+    };
   }
 };
 
-
-// Actualizar un paciente existente
-const updatePaciente = async (identificacion, input) => {
+// Obtener un paciente por identificacion
+const getPacienteByIdentificacion = async (identificacion) => {
   try {
-    if (!identificacion) {
-      throw new Error("La identificación es obligatoria para actualizar un paciente.");
+    const paciente = await prisma.pacientes.findUnique({
+      where: { identificacion },
+      select: {
+        id_pacientes: true,
+        identificacion: true,
+        tipo_identificacion: true,
+        nombre: true,
+        telefono1: true,
+        telefono2: true,
+        eps: true,
+        diagnostico: true,
+        entregados: true,
+        pendientes: true,
+      },
+    });
+
+    if (!paciente) {
+      throw new Error('Paciente no encontrado.');
     }
 
-    const data = {};
-    if (input.identificacion) data.identificacion = input.identificacion;
-    if (input.tipo_identificacion) data.tipo_identificacion = input.tipo_identificacion;
-    if (input.nombre) data.nombre = input.nombre;
-    if (input.telefono1) data.telefono1 = input.telefono1;
-    if (input.telefono2) data.telefono2 = input.telefono2;
-    if (input.eps) data.eps = input.eps;
+    return paciente;
+  } catch (error) {
+    throw new Error('Error al obtener el paciente: ' + error.message);
+  }
+};
 
-    if (Object.keys(data).length === 0) {
-      throw new Error("No se proporcionaron campos para actualizar.");
+// Obtener todos los pacientes
+const getAllPacientes = async () => {
+  try {
+    const pacientes = await prisma.pacientes.findMany({
+      select: {
+        id_pacientes: true,
+        identificacion: true,
+        tipo_identificacion: true,
+        nombre: true,
+        telefono1: true,
+        telefono2: true,
+        eps: true,
+      },
+    });
+    return pacientes;
+  } catch (error) {
+    console.error('Error al obtener todos los pacientes:', error.message);
+    throw new Error('Error al obtener todos los pacientes.');
+  }
+};
+
+// Actualizar un paciente por identificacion
+const updatePaciente = async (identificacion, { tipo_identificacion, nombre, telefono1, telefono2, eps }) => {
+  if (!identificacion) {
+    return {
+      success: false,
+      message: 'La identificación del paciente es obligatoria.',
+      paciente: null,
+    };
+  }
+
+  try {
+    const paciente = await prisma.pacientes.findUnique({
+      where: { identificacion },
+    });
+
+    if (!paciente) {
+      return {
+        success: false,
+        message: `Paciente con identificación "${identificacion}" no encontrado.`,
+        paciente: null,
+      };
     }
+
+    const updateData = {};
+    if (tipo_identificacion) updateData.tipo_identificacion = tipo_identificacion;
+    if (nombre) updateData.nombre = nombre;
+    if (telefono1) updateData.telefono1 = telefono1;
+    if (telefono2) updateData.telefono2 = telefono2;
+    if (eps) updateData.eps = eps;
 
     const pacienteActualizado = await prisma.pacientes.update({
       where: { identificacion },
-      data,
+      data: updateData,
     });
 
-    return { success: true, message: 'Paciente actualizado con éxito.', pacienteActualizado }; 
+    return {
+      success: true,
+      message: 'Paciente actualizado con éxito.',
+      paciente: pacienteActualizado,
+    };
   } catch (error) {
-    throw new Error("Error al actualizar el paciente: " + error.message);
+    return {
+      success: false,
+      message: 'Error al actualizar el paciente: ' + error.message,
+      paciente: null,
+    };
   }
-};
+};  
 
-// Eliminar un paciente
+// Eliminar un paciente por identificacion
 const deletePaciente = async (identificacion) => {
+  if (!identificacion) {
+    return {
+      success: false,
+      message: 'La identificacion del paciente es obligatoria.',
+    };
+  }
+
   try {
-    if (!identificacion) {
-      throw new Error("La identificación es obligatoria para eliminar un paciente.");
+    const paciente = await prisma.pacientes.findUnique({
+      where: { identificacion },
+    });
+
+    if (!paciente) {
+      return {
+        success: false,
+        message: `Paciente con identificacion "${identificacion}" no encontrado.`,
+      };
     }
 
     await prisma.pacientes.delete({
       where: { identificacion },
     });
 
-    return { success: true, message: 'Paciente eliminado con éxito.' }; 
+    return {
+      success: true,
+      message: `Paciente con identificacion "${identificacion}" eliminado con éxito.`,
+    };
   } catch (error) {
-    throw new Error("Error al eliminar el paciente: " + error.message);
+    return {
+      success: false,
+      message: 'Error al eliminar el paciente: ' + error.message,
+    };
   }
 };
 
-
 module.exports = {
-  getPacientes,
-  getPacienteById,
-  getPacienteByIdentificacion,
   createPaciente,
+  getPacienteByIdentificacion,
+  getAllPacientes,
   updatePaciente,
   deletePaciente,
 };

@@ -3,12 +3,12 @@ const { createSede, getSedeByNombre, getAllSedes, updateSede, deleteSede } = req
 const resolvers = {
   Query: {
     // Obtener todas las sedes
-    sedes: async () => {
+    getAllSedes: async () => {
       try {
         return await getAllSedes();
       } catch (error) {
-        console.error('Error en el resolver de sedes:', error.message);
-        throw new Error('Error al obtener las sedes.');
+        console.error('Error en el resolver de getAllSedes:', error.message);
+        throw new Error('Error al obtener todas las sedes.');
       }
     },
 

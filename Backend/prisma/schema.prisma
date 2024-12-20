@@ -50,7 +50,7 @@ model Pacientes {
 
 model Diagnostico {
   id_diagnostico Int          @id @default(autoincrement())
-  codigo         String       @db.VarChar(45)
+  codigo         String       @unique @db.VarChar(45)
   descripcion    String       @db.VarChar(500)
   paciente_id    String
   paciente       Pacientes    @relation(fields: [paciente_id], references: [identificacion])
