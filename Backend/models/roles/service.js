@@ -7,7 +7,7 @@ const createRole = async ({ nombre }) => {
     return {
       success: false,
       message: 'El nombre del rol es obligatorio.',
-      role: null, 
+      role: null,
     };
   }
 
@@ -17,30 +17,30 @@ const createRole = async ({ nombre }) => {
     });
 
     return {
-      success: true, 
+      success: true,
       message: `Rol "${role.nombre}" creado con éxito.`,
-      role, 
+      role,
     };
   } catch (error) {
     return {
       success: false,
       message: 'Error al crear el rol: ' + error.message,
-      role: null, 
+      role: null,
     };
   }
 };
 
-// Obtener un rol por Nombre
+// Obtener un rol por nombre
 const getRoleByNombre = async (nombre) => {
   if (!nombre) {
     return {
       success: false,
       message: 'El nombre del rol es obligatorio.',
+      role: null,
     };
   }
 
   try {
-    // Busca el rol y sus usuarios asociados
     const role = await prisma.roles.findUnique({
       where: { nombre },
       include: {
@@ -58,43 +58,43 @@ const getRoleByNombre = async (nombre) => {
       return {
         success: false,
         message: `No se encontró un rol con el nombre "${nombre}".`,
+        role: null,
       };
     }
 
     return {
       success: true,
-      message: `Rol encontrado.`,
-      role: {
-        id_rol: role.id_rol,
-        nombre: role.nombre,
-        usuarios: role.usuarios, 
-      },
+      message: 'Rol encontrado.',
+      role,
     };
   } catch (error) {
     return {
       success: false,
       message: 'Error al obtener el rol: ' + error.message,
+      role: null,
     };
   }
 };
-
 
 // Obtener todos los roles
 const getAllRoles = async () => {
   try {
     const roles = await prisma.roles.findMany({
-      include: { usuarios: true },
+      include: {
+        usuarios: true,
+      },
     });
 
     return {
       success: true,
-      message: `Roles obtenidos con éxito.`,
+      message: 'Roles obtenidos con éxito.',
       roles,
     };
   } catch (error) {
     return {
       success: false,
       message: 'Error al obtener los roles: ' + error.message,
+      roles: [],
     };
   }
 };
@@ -117,20 +117,20 @@ const updateRole = async (nombre, { nombreNuevo }) => {
     if (!role) {
       return {
         success: false,
-        message: `No se encontró un rol con el nombre ${id_rol}.`,
+        message: `No se encontró un rol con el nombre "${nombre}".`,
         role: null,
       };
     }
 
-    const roleActualizado = await prisma.roles.update({
+    const updatedRole = await prisma.roles.update({
       where: { nombre },
       data: { nombre: nombreNuevo },
     });
 
     return {
       success: true,
-      message: `Rol "${roleActualizado.nombre}" actualizado con éxito.`,
-      role: roleActualizado,
+      message: `Rol actualizado con éxito a "${updatedRole.nombre}".`,
+      role: updatedRole,
     };
   } catch (error) {
     return {
@@ -158,18 +158,17 @@ const deleteRole = async (nombre) => {
     if (!role) {
       return {
         success: false,
-        message: `No se encontró un rol con el nombre ${nombre}.`,
+        message: `No se encontró un rol con el nombre "${nombre}".`,
       };
     }
 
-    const deletedRole = await prisma.roles.delete({
+    await prisma.roles.delete({
       where: { nombre },
     });
 
     return {
       success: true,
-      message: `Rol "${deletedRole.nombre}" eliminado con éxito.`,
-      role: deletedRole,
+      message: `Rol "${nombre}" eliminado con éxito.`,
     };
   } catch (error) {
     return {

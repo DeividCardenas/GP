@@ -54,8 +54,7 @@ const typeDefs = gql`
   }
 
   type Query {
-    usuarios: [Usuarios]
-    getUsuario(id_usuario: Int!): Usuarios
+    getAllUsuarios: [Usuarios]
     getUsuarioByIdentificacion(identificacion: String!): Usuarios
   }
 

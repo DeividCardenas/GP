@@ -57,12 +57,24 @@ const getSedeByNombre = async (nombre) => {
     });
 
     if (!sede) {
-      throw new Error('Sede no encontrada.');
+      return {
+        success: false,
+        message: 'Sede no encontrada.',
+        sede: null,
+      };
     }
 
-    return sede;
+    return {
+      success: true,
+      message: `Sede encontrada con éxito.`,
+      sede,
+    };
   } catch (error) {
-    throw new Error('Error al obtener la sede: ' + error.message);
+    return {
+      success: false,
+      message: 'Error al obtener la sede: ' + error.message,
+      sede: null,
+    };
   }
 };
 
@@ -79,19 +91,27 @@ const getAllSedes = async () => {
         },
       },
     });
-    return sedes;
+
+    return {
+      success: true,
+      message: 'Sedes obtenidas con éxito.',
+      sedes,
+    };
   } catch (error) {
-    console.error('Error al obtener todas las sedes:', error.message);
-    throw new Error('Error al obtener todas las sedes.');
+    return {
+      success: false,
+      message: 'Error al obtener todas las sedes: ' + error.message,
+      sedes: null,
+    };
   }
 };
 
 // Actualizar una sede por nombre
 const updateSede = async (nombre, { nombreNuevo }) => {
-  if (!nombre) {
+  if (!nombre || !nombreNuevo) {
     return {
       success: false,
-      message: 'El nombre de la sede es obligatorio.',
+      message: 'El nombre actual y el nuevo nombre son obligatorios.',
       sede: null,
     };
   }
@@ -109,7 +129,6 @@ const updateSede = async (nombre, { nombreNuevo }) => {
       };
     }
 
-    // Actualizar la sede con el nuevo nombre
     const sedeActualizada = await prisma.sedes.update({
       where: { nombre },
       data: { nombre: nombreNuevo },

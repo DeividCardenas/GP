@@ -1,3 +1,4 @@
+// Updated resolvers
 const {
   createRole,
   getRoleByNombre,
@@ -9,83 +10,50 @@ const {
 const resolvers = {
   Query: {
     // Obtener todos los roles
-    roles: async () => {
-      try {
-        const roles = await getAllRoles();
-        return roles;
-      } catch (error) {
-        throw new Error('Error al obtener los roles: ' + error.message);
-      }
-    },
-
-    // Obtener un rol por ID
-    getRoleByNombre: async (_, { nombre }) => {
-      try {
-        // Llamar a la función getRoleByNombre con el nombre proporcionado
-        const result = await getRoleByNombre(nombre);
-    
-        if (result.success) {
-          return {
-            success: true,
-            message: result.message,
-            role: result.role,
-          };
-        } else {
-          throw new Error(result.message);
-        }
-      } catch (error) {
-        return {
-          success: false,
-          message: 'Error al obtener el rol: ' + error.message,
-          role: null,
-        };
-      }
-    },  
-  },
-
-  Mutation: {
-    // Crear un nuevo rol
-    createRole: async (_, { input }) => {
-      const { nombre } = input;
-    
-      const response = await createRole({ nombre });
-
+    getAllRoles: async () => {
+      const response = await getAllRoles();
       if (!response.success) {
         throw new Error(response.message);
       }
-    
-      return {
-        message: response.message,
-        role: response.role,
-      };
+      return response;
     },
-    
+
+    // Obtener un rol por nombre
+    getRoleByNombre: async (_, { nombre }) => {
+      const response = await getRoleByNombre(nombre);
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      return response;
+    },
+  },
+
+  Mutation: {
+    // Crear un rol
+    createRole: async (_, { input }) => {
+      const response = await createRole(input);
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      return response;
+    },
 
     // Actualizar un rol
     updateRole: async (_, { nombre, input }) => {
-        const response = await updateRole(nombre, input);
-
-        if (!response.success) {
-          throw new Error(response.message);
-        }
-  
-        return {
-          message: response.message,
-          role: response.role,
-        };
+      const response = await updateRole(nombre, input);
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      return response;
     },
 
     // Eliminar un rol
     deleteRole: async (_, { nombre }) => {
       const response = await deleteRole(nombre);
-
       if (!response.success) {
         throw new Error(response.message);
       }
-
-      return {
-        message: response.message,
-      };
+      return response;
     },
   },
 };

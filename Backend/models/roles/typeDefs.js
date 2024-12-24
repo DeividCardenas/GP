@@ -1,11 +1,6 @@
 const gql = require('graphql-tag');
 
 const typeDefs = gql`
-  type Roles {
-    nombre: String
-    usuarios: [Usuarios]
-  }
-
   type Role {
     id_rol: Int
     nombre: String
@@ -19,6 +14,7 @@ const typeDefs = gql`
   }
 
   type RoleResponse {
+    success: Boolean
     message: String
     role: Role
   }
@@ -26,25 +22,25 @@ const typeDefs = gql`
   type RolesListResponse {
     success: Boolean
     message: String
-    roles: [Roles]
+    roles: [Role]
   }
 
   input CreateRoleInput {
-    nombre: String
+    nombre: String!
   }
-  
+
   input UpdateRoleInput {
-  nombreNuevo: String!
+    nombreNuevo: String!
   }
 
   type Query {
-    roles: RolesListResponse
+    getAllRoles: RolesListResponse
     getRoleByNombre(nombre: String!): RoleResponse
   }
 
   type Mutation {
-    createRole(input: CreateRoleInput): RoleResponse
-    updateRole(nombre: String!, input: UpdateRoleInput): RoleResponse
+    createRole(input: CreateRoleInput!): RoleResponse
+    updateRole(nombre: String!, input: UpdateRoleInput!): RoleResponse
     deleteRole(nombre: String!): RoleResponse
   }
 `;

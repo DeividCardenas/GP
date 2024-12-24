@@ -3,7 +3,7 @@ const { loginUsuario, createUser, getUsuarioByIdentificacion, getAllUsuarios, up
 const resolvers = {
 
   Query: {
-    usuarios: async () => {
+    getAllUsuarios: async () => {
       try {
         return await getAllUsuarios();
       } catch (error) {

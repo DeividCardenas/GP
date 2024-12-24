@@ -10,7 +10,6 @@ const validateInput = (data, requiredFields) => {
 };
 
 async function loginUsuario(nombre_usuario, contrasena) {
-  
   const usuario = await prisma.usuarios.findUnique({
       where: { nombre_usuario },
       include: { role: true, sede: true },

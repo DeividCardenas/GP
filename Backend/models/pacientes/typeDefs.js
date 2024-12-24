@@ -1,7 +1,6 @@
-const { gql } = require('graphql-tag');
+const gql = require('graphql-tag');
 
 const typeDefs = gql`
-  # Tipo Pacientes
   type Pacientes {
     id_pacientes: Int
     identificacion: String
@@ -15,9 +14,17 @@ const typeDefs = gql`
     pendientes: [Pendientes]
   }
 
-  # Input para crear y actualizar pacientes
-  input PacienteInput {
-    identificacion: String
+  input CreatePacienteInput {
+    identificacion: String!
+    tipo_identificacion: String!
+    nombre: String!
+    telefono1: String!
+    telefono2: String
+    eps: String!
+  }
+
+  input UpdatePacienteInput {
+    identificacionNuevo: String
     tipo_identificacion: String
     nombre: String
     telefono1: String
@@ -25,26 +32,21 @@ const typeDefs = gql`
     eps: String
   }
 
-  # Querys
+  type PacienteResponse {
+    success: Boolean
+    message: String
+    paciente: Pacientes
+  }
+
   type Query {
-    pacientes: [Pacientes]         
-    getPacienteByIdentificacion(identificacion: String!): Pacientes
+    getAllPacientes: [Pacientes]
+    getPaciente(id_pacientes: Int!): Pacientes
   }
 
-  # Mutations
   type Mutation {
-    createPaciente(input: PacienteInput!): ResponsePaciente
-    updatePaciente(identificacion: String!, input: PacienteInput!): ResponsePaciente
-    deletePaciente(identificacion: String!): ResponseMessage
-  }
-
-  type ResponsePaciente {
-    message: String
-    paciente: Pacientes       
-  }
-
-  type ResponseMessage {
-    message: String
+    createPaciente(input: CreatePacienteInput!): PacienteResponse
+    updatePaciente(identificacion: String!, input: UpdatePacienteInput!): PacienteResponse
+    deletePaciente(identificacion: String!): PacienteResponse
   }
 `;
 

@@ -18,8 +18,15 @@ const typeDefs = gql`
   }
 
   type SedeResponse {
+    success: Boolean
     message: String
     sede: Sede
+  }
+
+  type SedeListResponse {
+    success: Boolean
+    message: String
+    sedes: [Sede]
   }
 
   input CreateSedeInput {
@@ -31,12 +38,12 @@ const typeDefs = gql`
   }
 
   type Query {
-    getAllSedes: [Sede]  
-    getSedeByNombre(nombre: String!): Sede
+    getAllSedes: SedeListResponse
+    getSedeByNombre(nombre: String!): SedeResponse
   }
 
   type Mutation {
-    createSede(input: CreateSedeInput!): SedeResponse!
+    createSede(input: CreateSedeInput!): SedeResponse
     updateSede(nombre: String!, input: UpdateSedeInput!): SedeResponse
     deleteSede(nombre: String!): SedeResponse
   }

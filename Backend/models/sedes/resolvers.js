@@ -2,58 +2,48 @@ const { createSede, getSedeByNombre, getAllSedes, updateSede, deleteSede } = req
 
 const resolvers = {
   Query: {
-    // Obtener todas las sedes
     getAllSedes: async () => {
-      try {
-        return await getAllSedes();
-      } catch (error) {
-        console.error('Error en el resolver de getAllSedes:', error.message);
-        throw new Error('Error al obtener todas las sedes.');
-      }
-    },
-
-    // Obtener una sede por nombre
-    getSedeByNombre: async (_, { nombre }) => {
-      try {
-        return await getSedeByNombre(nombre);
-      } catch (error) {
-        throw new Error('Error al obtener la sede: ' + error.message);
-      }
-    },
-  },
-
-  Mutation: {
-    // Crear una nueva sede
-    createSede: async (_, { input }) => {
-      const { nombre } = input;
-
-      const response = await createSede({ nombre });
+      const response = await getAllSedes();
 
       if (!response.success) {
         throw new Error(response.message);
       }
 
-      return {
-        message: response.message,
-        sede: response.sede,
-      };
+      return response;
     },
 
-    // Actualizar una sede
+    getSedeByNombre: async (_, { nombre }) => {
+      const response = await getSedeByNombre(nombre);
+
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+
+      return response;
+    },
+  },
+
+  Mutation: {
+    createSede: async (_, { input }) => {
+      const response = await createSede(input);
+
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+
+      return response;
+    },
+
     updateSede: async (_, { nombre, input }) => {
       const response = await updateSede(nombre, input);
 
       if (!response.success) {
-        throw new Error(response.message); 
+        throw new Error(response.message);
       }
 
-      return {
-        message: response.message,
-        sede: response.sede,
-      };
+      return response;
     },
 
-    // Eliminar una sede
     deleteSede: async (_, { nombre }) => {
       const response = await deleteSede(nombre);
 
@@ -61,9 +51,7 @@ const resolvers = {
         throw new Error(response.message);
       }
 
-      return {
-        message: response.message,
-      };
+      return response;
     },
   },
 };
